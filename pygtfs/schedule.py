@@ -37,11 +37,11 @@ class Schedule:
         self.session = Session()
         Base.metadata.create_all(self.engine)
 
-    def drop_feed(self, feed_id):
+    def drop_feed(self, feed_pk):
         """ Delete a feed from a database by feed id"""
         # the following does not cascade unfortunatly.
-        # self.session.query(Feed).filter(Feed.feed_id == feed_id).delete()
-        feed = self.session.query(Feed).get(feed_id)
+        # self.session.query(Feed).filter(Feed.feed_pk == feed_pk).delete()
+        feed = self.session.query(Feed).get(feed_pk)
         self.session.delete(feed)
         self.session.commit()
 

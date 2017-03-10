@@ -94,21 +94,21 @@ def _validate_float_none(*field_names):
 
 
 def create_foreign_keys(*key_names):
-    """ Create foreign key constraints, always including feed_id,
+    """ Create foreign key constraints, always including feed_pk,
         and relying on convention that key name is the same"""
     constraints = []
     for key in key_names:
         table, field = key.split('.')
-        constraints.append(ForeignKeyConstraint(["feed_id", field],
-                                                [table+".feed_id", key]))
+        constraints.append(ForeignKeyConstraint(["feed_pk", field],
+                                                [table+".feed_pk", key]))
     return tuple(constraints)
 
 
 class Feed(Base):
     __tablename__ = '_feed'
     _plural_name_ = 'feeds'
-    feed_id = Column(Integer, primary_key=True)
-    id = synonym('feed_id')
+    feed_pk = Column(Integer, primary_key=True)
+    id = synonym('feed_pk')
     feed_name = Column(Unicode)
     feed_append_date = Column(Date, nullable=True)
 
@@ -131,13 +131,13 @@ class Feed(Base):
     translations = relationship("Translation", backref=("feed"), cascade="all, delete-orphan")
 
     def __repr__(self):
-        return '<Feed %s: %s>' % (self.feed_id, self.feed_name)
+        return '<Feed %s: %s>' % (self.feed_pk, self.feed_name)
 
 
 class Agency(Base):
     __tablename__ = 'agency'
     _plural_name_ = 'agencies'
-    feed_id = Column(Integer, ForeignKey('_feed.feed_id'), primary_key=True)
+    feed_pk = Column(Integer, ForeignKey('_feed.feed_pk'), primary_key=True)
     agency_id = Column(Unicode, primary_key=True, default="None", index=True)
     id = synonym('agency_id')
     agency_name = Column(Unicode)
@@ -157,7 +157,7 @@ class Agency(Base):
 class Stop(Base):
     __tablename__ = 'stops'
     _plural_name_ = 'stops'
-    feed_id = Column(Integer, ForeignKey('_feed.feed_id'), primary_key=True)
+    feed_pk = Column(Integer, ForeignKey('_feed.feed_pk'), primary_key=True)
     stop_id = Column(Unicode, primary_key=True, index=True)
     id = synonym('stop_id')
     stop_code = Column(Unicode, nullable=True, index=True)
@@ -195,7 +195,7 @@ class Stop(Base):
 class Route(Base):
     __tablename__ = 'routes'
     _plural_name_ = 'routes'
-    feed_id = Column(Integer, ForeignKey('_feed.feed_id'), primary_key=True)
+    feed_pk = Column(Integer, ForeignKey('_feed.feed_pk'), primary_key=True)
     route_id = Column(Unicode, primary_key=True, index=True)
     id = synonym('route_id')
     agency_id = Column(Unicode, default="None")
@@ -221,7 +221,7 @@ class Route(Base):
 class Trip(Base):
     __tablename__ = 'trips'
     _plural_name_ = 'trips'
-    feed_id = Column(Integer, ForeignKey('_feed.feed_id'), primary_key=True)
+    feed_pk = Column(Integer, ForeignKey('_feed.feed_pk'), primary_key=True)
     route_id = Column(Unicode)
     service_id = Column(Unicode)
     trip_id = Column(Unicode, primary_key=True, index=True)
@@ -253,12 +253,12 @@ class Trip(Base):
 class Translation(Base):
     __tablename__ = 'translations'
     _plural_name_ = 'translations'
-    feed_id = Column(Integer, ForeignKey('_feed.feed_id'))
+    feed_pk = Column(Integer, ForeignKey('_feed.feed_pk'))
     trans_id = Column(Unicode, primary_key=True, index=True)
     lang = Column(Unicode, primary_key=True)
     translation = Column(Unicode)
-    __table_args__ = (ForeignKeyConstraint(["feed_id", 'trans_id'],
-                                           ["stops.feed_id",
+    __table_args__ = (ForeignKeyConstraint(["feed_pk", 'trans_id'],
+                                           ["stops.feed_pk",
                                             "stops.stop_name"]),)
 
     def __repr__(self):
@@ -269,7 +269,7 @@ class Translation(Base):
 class StopTime(Base):
     __tablename__ = 'stop_times'
     _plural_name_ = 'stop_times'
-    feed_id = Column(Integer, ForeignKey('_feed.feed_id'), primary_key=True)
+    feed_pk = Column(Integer, ForeignKey('_feed.feed_pk'), primary_key=True)
     trip_id = Column(Unicode, primary_key=True)
     arrival_time = Column(Interval)
     departure_time = Column(Interval)
@@ -297,7 +297,7 @@ class StopTime(Base):
 class Service(Base):
     __tablename__ = 'calendar'
     _plural_name_ = 'services'
-    feed_id = Column(Integer, ForeignKey('_feed.feed_id'), primary_key=True)
+    feed_pk = Column(Integer, ForeignKey('_feed.feed_pk'), primary_key=True)
     service_id = Column(Unicode, primary_key=True, index=True)
     id = synonym('service_id')
     monday = Column(Boolean)
@@ -313,8 +313,8 @@ class Service(Base):
     trips = relationship('Trip',
                          backref='service',
                          primaryjoin=and_(service_id == Trip.service_id,
-                                          feed_id == Trip.feed_id),
-                         foreign_keys=[Trip.service_id, Trip.feed_id]
+                                          feed_pk == Trip.feed_pk),
+                         foreign_keys=[Trip.service_id, Trip.feed_pk]
                          )
 
     _validate_bools = _validate_int_bool('monday', 'tuesday', 'wednesday',
@@ -337,7 +337,7 @@ class Service(Base):
 class ServiceException(Base):
     __tablename__ = 'calendar_dates'
     _plural_name_ = 'service_exceptions'
-    feed_id = Column(Integer, ForeignKey('_feed.feed_id'), primary_key=True)
+    feed_pk = Column(Integer, ForeignKey('_feed.feed_pk'), primary_key=True)
     service_id = Column(Unicode, primary_key=True, index=True)
     id = synonym('service_id')
     date = Column(Date, primary_key=True)
@@ -353,7 +353,7 @@ class ServiceException(Base):
 class Fare(Base):
     __tablename__ = 'fare_attributes'
     _plural_name_ = 'fares'
-    feed_id = Column(Integer, ForeignKey('_feed.feed_id'), primary_key=True)
+    feed_pk = Column(Integer, ForeignKey('_feed.feed_pk'), primary_key=True)
     fare_id = Column(Unicode, primary_key=True, index=True)
     id = synonym('fare_id')
     price = Column(Numeric)
@@ -373,7 +373,7 @@ class Fare(Base):
 class FareRule(Base):
     __tablename__ = 'fare_rules'
     _plural_name_ = 'fare_rules'
-    feed_id = Column(Integer, ForeignKey('_feed.feed_id'), primary_key=True)
+    feed_pk = Column(Integer, ForeignKey('_feed.feed_pk'), primary_key=True)
     fare_id = Column(Unicode, primary_key=True)
     route_id = Column(Unicode, nullable=True, primary_key=True)
 
@@ -397,7 +397,7 @@ class FareRule(Base):
 class ShapePoint(Base):
     __tablename__ = 'shapes'
     _plural_name_ = 'shapes'
-    feed_id = Column(Integer, ForeignKey('_feed.feed_id'), primary_key=True)
+    feed_pk = Column(Integer, ForeignKey('_feed.feed_pk'), primary_key=True)
     shape_id = Column(Unicode, primary_key=True)
     shape_pt_lat = Column(Float)
     shape_pt_lon = Column(Float)
@@ -417,7 +417,7 @@ class ShapePoint(Base):
 class Frequency(Base):
     __tablename__ = 'frequencies'
     _plural_name_ = 'frequencies'
-    feed_id = Column(Integer, ForeignKey('_feed.feed_id'), primary_key=True)
+    feed_pk = Column(Integer, ForeignKey('_feed.feed_pk'), primary_key=True)
     trip_id = Column(Unicode, primary_key=True)
     start_time = Column(Interval, primary_key=True)
     end_time = Column(Interval, primary_key=True)
@@ -437,7 +437,7 @@ class Frequency(Base):
 class Transfer(Base):
     __tablename__ = 'transfers'
     _plural_name_ = 'transfers'
-    feed_id = Column(Integer, ForeignKey('_feed.feed_id'), primary_key=True)
+    feed_pk = Column(Integer, ForeignKey('_feed.feed_pk'), primary_key=True)
     from_stop_id = Column(Unicode, primary_key=True)
     to_stop_id = Column(Unicode, primary_key=True)
     transfer_type = Column(Integer, nullable=True)  # required; allowed empty
@@ -445,10 +445,10 @@ class Transfer(Base):
 
     __table_args__ = (
         ForeignKeyConstraint(
-            ('feed_id', 'from_stop_id'), ('stops.feed_id', 'stops.stop_id')
+            ('feed_pk', 'from_stop_id'), ('stops.feed_pk', 'stops.stop_id')
         ),
         ForeignKeyConstraint(
-            ('feed_id', 'to_stop_id'), ('stops.feed_id', 'stops.stop_id')
+            ('feed_pk', 'to_stop_id'), ('stops.feed_pk', 'stops.stop_id')
         ),
     )
 
@@ -462,7 +462,8 @@ class Transfer(Base):
 class FeedInfo(Base):
     __tablename__ = 'feed_info'
     _plural_name_ = 'feed_infos'
-    feed_id = Column(Integer, ForeignKey('_feed.feed_id'), primary_key=True)
+    feed_pk = Column(Integer, ForeignKey('_feed.feed_pk'), primary_key=True)
+    feed_id = Column(Unicode, nullable=True)
     feed_publisher_name = Column(Unicode, primary_key=True)
     feed_publisher_url = Column(Unicode, primary_key=True)
     feed_lang = Column(Unicode)

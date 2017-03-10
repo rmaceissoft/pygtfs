@@ -33,7 +33,7 @@ def delete_feed(schedule, feed_filename, interactive=False):
             if ans == "A":
                 delete_all = True
         # you get here if ans is A or O, and if delete_all
-        schedule.drop_feed(matching_feed.feed_id)
+        schedule.drop_feed(matching_feed.feed_pk)
 
 
 def overwrite_feed(schedule, feed_filename, *args, **kwargs):
@@ -64,7 +64,7 @@ def append_feed(schedule, feed_filename, strip_fields=True,
     feed_entry = Feed(feed_name=fd.feed_name, feed_append_date=date.today())
     schedule.session.add(feed_entry)
     schedule.session.flush()
-    feed_id = feed_entry.feed_id
+    feed_pk = feed_entry.feed_pk
     for gtfs_class in gtfs_all:
         if gtfs_class not in gtfs_tables:
             continue
@@ -86,7 +86,7 @@ def append_feed(schedule, feed_filename, strip_fields=True,
                 del records_as_dict[field]  # Filter out unsupported fields
 
             try:
-                instance = gtfs_class(feed_id=feed_id, **records_as_dict)
+                instance = gtfs_class(feed_pk=feed_pk, **records_as_dict)
             except:
                 print("Failure while writing {0}".format(record))
                 raise
