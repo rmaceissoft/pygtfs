@@ -172,6 +172,7 @@ class Stop(Base):
     stop_timezone = Column(Unicode, nullable=True)
     wheelchair_boarding = Column(Integer, nullable=True)
     platform_code = Column(Unicode, nullable=True)
+    tpis_name = Column(Unicode, nullable=True)
 
     stop_times = relationship('StopTime', backref="stop")
     transfers_to = relationship('Transfer', backref="stop_to",
