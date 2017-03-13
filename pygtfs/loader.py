@@ -85,6 +85,13 @@ def append_feed(schedule, feed_filename, strip_fields=True,
             for field in fields_to_filter:
                 del records_as_dict[field]  # Filter out unsupported fields
 
+            if gtfs_class.__tablename__ == "feed_info":
+                # consider when feed_start_date and feed_end_date are empty strings
+                if not records_as_dict['feed_start_date']:
+                    del records_as_dict['feed_start_date']
+                if not records_as_dict['feed_end_date']:
+                    del records_as_dict['feed_end_date']
+
             try:
                 instance = gtfs_class(feed_pk=feed_pk, **records_as_dict)
             except:
